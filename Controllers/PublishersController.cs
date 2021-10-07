@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using my_books.ActionResults;
+using my_books.Data.Models;
 using my_books.Data.Services;
 using my_books.Data.ViewModels;
 using my_books.Exceptions;
@@ -15,11 +18,30 @@ namespace my_books.Controllers
     public class PublishersController : ControllerBase
     {
         private PublishersService _publishersService;
+        private readonly ILogger<PublishersController> _logger;
 
-        public PublishersController(PublishersService publishersService)
+        public PublishersController(PublishersService publishersService, ILogger<PublishersController> logger)
         {
             _publishersService = publishersService;
+            _logger = logger;
         }
+
+        [HttpGet("get-all-publishers")]
+
+        public IActionResult GetAllPublishers(string sortBy, string searchString, int pageNumber)
+        {
+            try
+            {
+                _logger.LogInformation("This is just a log in GetAllPublishers");
+                var _result = _publishersService.GetAllPublishers(sortBy, searchString, pageNumber);
+                return Ok(_result);
+            }
+            catch(Exception)
+            {
+                return BadRequest("Sorry we could not load the publishers");
+            }
+        }
+
         [HttpPost("add-publisher")]
         public IActionResult AddPublisher([FromBody] PublisherVM publisher)
         {
@@ -46,11 +68,25 @@ namespace my_books.Controllers
 
             if (_response != null)
             {
+                //var _responseObj = new CustomActionResultVM()
+                //{
+                //    Publisher = _response
+                //};
+                //return new CustomActionResult(_responseObj);
+
                 return Ok(_response);
             }
             else
             {
+                //var _responseObj = new CustomActionResultVM()
+                //{
+                //    Exception = new Exception("This is coming from Publishers controller")
+                //};
+                //return new CustomActionResult(_responseObj);
+
                 return NotFound();
+
+                
             }
         }
 
